@@ -27,8 +27,8 @@ func TestGetter(t *testing.T) {
 
 func TestGet(t *testing.T) {
 	loadCounts := make(map[string]int, len(db))
-	// 自己定义回调函数
-	gee := NewGroup("scores", 2<<10, GetterFunc(
+	// 自己定义回调函数，这里cacheBytes改变并观察
+	gee := NewGroup("scores", 6, GetterFunc(
 		func(key string) ([]byte, error) {
 			log.Println("[SlowDB] search key", key)
 			if v, ok := db[key]; ok {

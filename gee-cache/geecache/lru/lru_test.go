@@ -57,10 +57,20 @@ func TestOnEvicted(t *testing.T) {
 	lru := New(int64(cap), callback)
 
 	lru.Add("k1", String("v1"))
+	t.Log(lru.nBytes)
+	t.Log(lru.Len())
 	lru.Add("k2", String("v2"))
+	t.Log(lru.nBytes)
+	t.Log(lru.Len())
 	lru.Add("k3", String("v3"))
+	t.Log(lru.nBytes)
+	t.Log(lru.Len())
 	lru.Add("k4", String("v4"))
+	t.Log(lru.nBytes)
+	t.Log(lru.Len())
 	lru.Add("k5", String("v5"))
+	t.Log(lru.nBytes)
+	t.Log(lru.Len())
 
 	t.Log(keys)
 

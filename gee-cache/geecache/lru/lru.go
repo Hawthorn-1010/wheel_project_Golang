@@ -4,7 +4,10 @@ package lru
 分布式缓存，k-v
 */
 
-import "container/list"
+import (
+	"container/list"
+	"log"
+)
 
 type Cache struct {
 	maxBytes int64 // 最大允许使用的内存
@@ -75,6 +78,7 @@ func (c *Cache) Add(key string, value Value) {
 		ele := c.ll.PushFront(&entry{key, value})
 		c.cache[key] = ele
 		kv := ele.Value.(*entry)
+		log.Println("db中每个的bytes：", int64(len(kv.key))+int64(kv.value.Len()))
 		c.nBytes += int64(len(kv.key)) + int64(kv.value.Len())
 	}
 	for c.maxBytes != 0 && c.maxBytes < c.nBytes {

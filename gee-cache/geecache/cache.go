@@ -6,6 +6,7 @@ package geecache
 
 import (
 	"geecache/lru"
+	"log"
 	"sync"
 )
 
@@ -23,6 +24,8 @@ func (c *cache) add(key string, byteView ByteView) {
 		// 这里的cacheBytes还没计算吧？
 		c.lru = lru.New(c.cacheBytes, nil)
 	}
+	log.Println(c.lru.Len())
+
 	c.lru.Add(key, byteView)
 }
 
