@@ -76,6 +76,7 @@ func (g *Group) load(key string) (ByteView, error) {
 
 // 这个方法 ?
 func (g *Group) getLocally(key string) (ByteView, error) {
+	// 把回调的放入cache
 	bytes, err := g.getter.Get(key)
 	if err != nil {
 		return ByteView{}, err

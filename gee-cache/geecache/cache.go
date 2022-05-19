@@ -5,7 +5,7 @@ package geecache
 */
 
 import (
-	"geecache/lru"
+	"gee-cache/geecache/lru"
 	"log"
 	"sync"
 )
