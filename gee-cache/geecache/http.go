@@ -105,7 +105,7 @@ var _ PeerGetter = (*httpGetter)(nil)
 func (p *HTTPPool) Set(peers ...string) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
-	p.peers = consistenthash.New(defaultReplicas, nil)
+	p.peers = consistenthash.New(nil, defaultReplicas)
 	p.peers.Add(peers...)
 	p.httpGetters = make(map[string]*httpGetter, len(peers))
 	for _, peer := range peers {
