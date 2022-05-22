@@ -19,11 +19,12 @@ const (
 )
 
 type HTTPPool struct {
-	self        string // 记录自己的地址，包括主机名/IP和端口
-	basePath    string // 节点间通讯地址的前缀
-	mu          sync.Mutex
-	peers       *consistenthash.Map
-	httpGetters map[string]*httpGetter
+	self     string // 记录自己的地址，包括主机名/IP和端口
+	basePath string // 节点间通讯地址的前缀
+	mu       sync.Mutex
+	peers    *consistenthash.Map
+	// 一个远程节点对应一个httpGetter
+	httpGetters map[string]*httpGetter // keyed by e.g. "http://10.0.0.2:8008"
 }
 
 func NewHTTPPool(self string) *HTTPPool {
@@ -84,6 +85,7 @@ type httpGetter struct {
 	baseUrl string
 }
 
+// 实现peers中的Get方法
 func (h *httpGetter) Get(in *pb.Request, out *pb.Response) error {
 	u := fmt.Sprintf(
 		"%v%v%v",
@@ -91,6 +93,8 @@ func (h *httpGetter) Get(in *pb.Request, out *pb.Response) error {
 		url.QueryEscape(in.GetGroup())+"/",
 		url.QueryEscape(in.GetKey()),
 	)
+
+	// 发送请求
 	res, err := http.Get(u)
 	if err != nil {
 		return err
@@ -113,8 +117,9 @@ func (h *httpGetter) Get(in *pb.Request, out *pb.Response) error {
 	return nil
 }
 
-var _ PeerGetter = (*httpGetter)(nil)
+//var _ PeerGetter = (*httpGetter)(nil)
 
+// 更新pool的节点名单
 func (p *HTTPPool) Set(peers ...string) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
@@ -122,18 +127,21 @@ func (p *HTTPPool) Set(peers ...string) {
 	p.peers.Add(peers...)
 	p.httpGetters = make(map[string]*httpGetter, len(peers))
 	for _, peer := range peers {
+		// 只可能端口号不同？
 		p.httpGetters[peer] = &httpGetter{baseUrl: peer + p.basePath}
 	}
 }
 
+// 包装了一致性哈希算法的 Get() 方法，根据具体的 key，选择节点，返回节点对应的 HTTP 客户端
 func (p *HTTPPool) PickPeer(key string) (PeerGetter, bool) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	if peer := p.peers.Get(key); peer != "" && peer != p.self {
+		// peer真实节点
 		p.Log("Pick peer %s", peer)
 		return p.httpGetters[peer], true
 	}
 	return nil, false
 }
 
-var _ PeerPicker = (*HTTPPool)(nil)
+//var _ PeerPicker = (*HTTPPool)(nil)

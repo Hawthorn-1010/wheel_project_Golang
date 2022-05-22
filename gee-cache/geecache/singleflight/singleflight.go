@@ -8,12 +8,14 @@ import (
 	"sync"
 )
 
+// 表示请求正在进行
 type call struct {
 	wg  sync.WaitGroup
 	val interface{}
 	err error
 }
 
+// 管理不同key的请求
 type Group struct {
 	mu sync.Mutex
 	m  map[string]*call

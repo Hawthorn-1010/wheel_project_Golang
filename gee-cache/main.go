@@ -42,6 +42,7 @@ func createGroup() *geecache.Group {
 		}))
 }
 
+// 启动缓存服务器，创建HTTPPool，添加节点信息注册到gee，启动http服务
 func startCacheServer(addr string, addrs []string, gee *geecache.Group) {
 	peers := geecache.NewHTTPPool(addr)
 	peers.Set(addrs...)
@@ -50,9 +51,11 @@ func startCacheServer(addr string, addrs []string, gee *geecache.Group) {
 	log.Fatal(http.ListenAndServe(addr[7:], peers))
 }
 
+// 启动端口，与用户进行交互
 func startAPIServer(apiAddr string, gee *geecache.Group) {
 	http.Handle("/api", http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
+			// http://localhost:9999/api?key=Tom
 			key := r.URL.Query().Get("key")
 			view, err := gee.Get(key)
 			if err != nil {
