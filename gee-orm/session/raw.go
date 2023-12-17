@@ -2,18 +2,23 @@ package session
 
 import (
 	"database/sql"
+	"geeorm/dialect"
 	"geeorm/log"
+	"geeorm/schema"
 	"strings"
 )
 
 type Session struct {
-	db     *sql.DB
-	sql    strings.Builder
-	sqlVal []interface{}
+	dialect dialect.Dialect
+	db      *sql.DB
+	dbName  string
+	table   *schema.Table
+	sql     strings.Builder
+	sqlVal  []interface{}
 }
 
-func New(db *sql.DB) *Session {
-	return &Session{db: db}
+func New(db *sql.DB, dialect dialect.Dialect, dbName string) *Session {
+	return &Session{db: db, dialect: dialect, dbName: dbName}
 }
 
 // Encapsulation
@@ -39,13 +44,14 @@ func (s *Session) Raw(sql string, val ...interface{}) *Session {
 2. log sql info
 3. log error if error happen
 */
-func (s *Session) Exec() {
+func (s *Session) Exec() (sql.Result, error) {
 	defer s.Reset()
-	_, err := s.db.Exec(s.sql.String(), s.sqlVal...)
+	result, err := s.db.Exec(s.sql.String(), s.sqlVal...)
 	log.Info(s.sql.String(), s.sqlVal)
 	if err != nil {
 		log.Error(err)
 	}
+	return result, err
 }
 
 func (s *Session) QueryRow() *sql.Row {

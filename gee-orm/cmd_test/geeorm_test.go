@@ -9,7 +9,7 @@ import (
 )
 
 func TestEngine(t *testing.T) {
-	engine, _ := geeorm.NewEngine("", "mysql")
+	engine, _ := geeorm.NewEngine("username:password@tcp(127.0.0.1:3306)/dbname", "mysql")
 	defer engine.Close()
 	session := engine.NewSession()
 	session.Raw("DROP TABLE IF EXISTS User;").Exec()
@@ -32,5 +32,30 @@ func TestEngine(t *testing.T) {
 	// 检查是否有错误发生
 	if err := rows.Err(); err != nil {
 		log.Fatal(err)
+	}
+}
+
+func TestInterface(t *testing.T) {
+	args := []interface{}{"tableSchema", "tableName"}
+	t.Log(args)
+}
+
+type User struct {
+	Id   int
+	Name string
+}
+
+func TestCreateTable(t *testing.T) {
+	engine, _ := geeorm.NewEngine("root:root@tcp(192.168.255.3:3306)/books", "mysql")
+	defer engine.Close()
+	session := engine.NewSession()
+	session.SetTable(&User{})
+	session.CreateTable()
+	if session.HasTable() {
+		t.Log("create table success!")
+	}
+	session.DropTable()
+	if !session.HasTable() {
+		t.Log("drop table success!")
 	}
 }
