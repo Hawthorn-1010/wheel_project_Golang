@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"geeorm"
+	"geeorm/session"
 	_ "github.com/go-sql-driver/mysql"
 	"log"
 	"testing"
@@ -113,4 +114,37 @@ func TestGetFirstRecord(t *testing.T) {
 		log.Fatal("Get First error!")
 	}
 	t.Logf("%#v", user)
+}
+
+type Account struct {
+	ID       int
+	Password string
+}
+
+func (u *Account) BeforeQuery(s *session.Session) error {
+	log.Printf("________Before Query________")
+	u.ID += 1000
+	return nil
+}
+
+func (u *Account) AfterQuery(s *session.Session) error {
+	log.Printf("________After Query________")
+	u.Password = "******"
+	return nil
+}
+
+func TestSession_CallMethod(t *testing.T) {
+	engine, _ := geeorm.NewEngine("root:root@tcp(192.168.255.3:3306)/books", "mysql")
+	defer engine.Close()
+	s := engine.NewSession().SetTable(&Account{})
+	_ = s.DropTable()
+	_ = s.CreateTable()
+	_, _ = s.Insert(&Account{1, "123456"}, &Account{2, "qwerty"})
+
+	u := &Account{}
+
+	err := s.First(u)
+	if err != nil || u.ID != 1001 || u.Password != "******" {
+		t.Fatal("Failed to call hooks after query, got", u)
+	}
 }

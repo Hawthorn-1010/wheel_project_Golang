@@ -34,7 +34,9 @@ func Parse(model interface{}, dialect dialect.Dialect) *Table {
 	}
 
 	t := &Table{
-		Model:     modelType,
+		// todo
+		//Model:     modelType,
+		Model:     model,
 		TableName: modelType.Name(),
 		Columns:   columns,
 	}

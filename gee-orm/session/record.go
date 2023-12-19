@@ -49,6 +49,7 @@ func (s *Session) Insert(model ...interface{}) (int64, error) {
 }
 
 func (s *Session) Find(models interface{}) error {
+	s.Hook(BeforeQuery, nil)
 	modelSlice := reflect.Indirect(reflect.ValueOf(models))
 	modelType := modelSlice.Type().Elem()
 	table := s.SetTable(reflect.New(modelType).Elem().Interface()).table
@@ -73,6 +74,7 @@ func (s *Session) Find(models interface{}) error {
 		if err := rows.Scan(values...); err != nil {
 			return err
 		}
+		s.Hook(AfterQuery, dest.Addr().Interface())
 		modelSlice.Set(reflect.Append(modelSlice, dest))
 	}
 	return rows.Close()
