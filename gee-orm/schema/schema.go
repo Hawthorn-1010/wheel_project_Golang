@@ -18,17 +18,6 @@ type Table struct {
 	//columnsSeq    []string
 	//columnsMap    map[string][]*Column
 	Columns []*Column
-	//Indexes       map[string]*Index
-	//PrimaryKeys   []string
-	//AutoIncrement string
-	//Created       map[string]bool
-	//Updated       string
-	//Deleted       string
-	//Version       string
-	//StoreEngine   string
-	//Charset       string
-	//Comment       string
-	//Collation     string
 }
 
 func Parse(model interface{}, dialect dialect.Dialect) *Table {

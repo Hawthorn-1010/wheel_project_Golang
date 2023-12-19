@@ -20,17 +20,17 @@ var (
 	Infof  = infoLog.Printf
 )
 
-const (
-	INFOLEVEL = iota
-	ERRORLEVEL
-	DISCARD
-)
-
-func SetLevel(level int) {
-	switch level {
-	case INFOLEVEL:
-		{
-
-		}
-	}
-}
+//const (
+//	INFOLEVEL = iota
+//	ERRORLEVEL
+//	DISCARD
+//)
+//
+//func SetLevel(level int) {
+//	switch level {
+//	case INFOLEVEL:
+//		{
+//
+//		}
+//	}
+//}

@@ -9,7 +9,7 @@ import (
 )
 
 func TestEngine(t *testing.T) {
-	engine, _ := geeorm.NewEngine("username:password@tcp(127.0.0.1:3306)/dbname", "mysql")
+	engine, _ := geeorm.NewEngine("root:root@tcp(192.168.255.3:3306)/books", "mysql")
 	defer engine.Close()
 	session := engine.NewSession()
 	session.Raw("DROP TABLE IF EXISTS User;").Exec()
@@ -28,8 +28,6 @@ func TestEngine(t *testing.T) {
 		}
 		fmt.Printf("ID: %d, Name: %s\n", id, name)
 	}
-
-	// 检查是否有错误发生
 	if err := rows.Err(); err != nil {
 		log.Fatal(err)
 	}
@@ -45,6 +43,12 @@ type User struct {
 	Name string
 }
 
+var (
+	user1 = &User{1, "Tom"}
+	user2 = &User{2, "Sam"}
+	user3 = &User{3, "Jack"}
+)
+
 func TestCreateTable(t *testing.T) {
 	engine, _ := geeorm.NewEngine("root:root@tcp(192.168.255.3:3306)/books", "mysql")
 	defer engine.Close()
@@ -54,8 +58,23 @@ func TestCreateTable(t *testing.T) {
 	if session.HasTable() {
 		t.Log("create table success!")
 	}
-	session.DropTable()
-	if !session.HasTable() {
-		t.Log("drop table success!")
+	session.Insert(user1)
+}
+
+func TestInsertRecord(t *testing.T) {
+	engine, _ := geeorm.NewEngine("root:root@tcp(192.168.255.3:3306)/books", "mysql")
+	defer engine.Close()
+	s := engine.NewSession()
+	s.Insert(user2, user3)
+}
+
+func TestFindRecord(t *testing.T) {
+	engine, _ := geeorm.NewEngine("root:root@tcp(192.168.255.3:3306)/books", "mysql")
+	defer engine.Close()
+	s := engine.NewSession()
+	var user []User
+	if err := s.Find(&user); err != nil {
+		log.Fatal("Find error!")
 	}
+	t.Logf("%#v", user)
 }

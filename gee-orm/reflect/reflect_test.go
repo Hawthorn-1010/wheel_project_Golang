@@ -1,8 +1,9 @@
-package main
+package reflect
 
 import (
 	"fmt"
 	"reflect"
+	"testing"
 )
 
 type Account struct {
@@ -10,7 +11,7 @@ type Account struct {
 	Password string
 }
 
-func main() {
+func TestReflect(t *testing.T) {
 	account := Account{
 		Name:     "Sally",
 		Password: "12345",
@@ -20,10 +21,13 @@ func main() {
 	//fmt.Println(value.Field(1))
 	//fmt.Println(value.Type().Name())
 	//fmt.Println(reflect.Indirect(value).Type().Field(1).Name)
-	for i := 0; i < reflect.Indirect(value).Type().NumField(); i++ {
-		fmt.Println(reflect.Indirect(value).Type().Field(i))
-	}
+	//for i := 0; i < reflect.Indirect(value).Type().NumField(); i++ {
+	//	fmt.Println(reflect.Indirect(value).Type().Field(i))
+	//}
 
+	for i := 0; i < reflect.Indirect(value).Type().NumField(); i++ {
+		fmt.Println(reflect.Indirect(value).Field(i).Interface())
+	}
 	//typ := reflect.Indirect(reflect.ValueOf(&account)).Type()
 	//fmt.Println(typ.Name()) // Account
 	//
