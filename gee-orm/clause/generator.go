@@ -18,6 +18,9 @@ func init() {
 	generators[WHERE] = _where
 	generators[LIMIT] = _limit
 	generators[ORDERBY] = _orderBy
+	generators[UPDATE] = _update
+	generators[DELETE] = _delete
+	generators[COUNT] = _count
 }
 
 func genBindVars(num int) string {
@@ -55,6 +58,7 @@ func _values(vals ...interface{}) (string, []interface{}) {
 	return sql.String(), vars
 }
 
+// TODO 是否需要修改
 func _select(val ...interface{}) (string, []interface{}) {
 	tableName := val[0]
 	fields := strings.Join(val[1].([]string), ", ")
@@ -63,7 +67,7 @@ func _select(val ...interface{}) (string, []interface{}) {
 }
 
 func _where(val ...interface{}) (string, []interface{}) {
-	sql := fmt.Sprintf("WHERE %s", val[0].(string))
+	sql := fmt.Sprintf("WHERE %s", val[0])
 	return sql, []interface{}{}
 }
 
@@ -72,9 +76,23 @@ func _limit(val ...interface{}) (string, []interface{}) {
 }
 
 func _orderBy(val ...interface{}) (string, []interface{}) {
-	sort := val[0]
-	// order 先跟一个字段
-	fields := val[1]
-	sql := fmt.Sprintf("ORDER BY %s %s", fields, sort)
+	sql := fmt.Sprintf("ORDER BY %s", val[0])
 	return sql, []interface{}{}
+}
+
+// TODO
+func _update(val ...interface{}) (string, []interface{}) {
+	tableName := val[0]
+	vals := val[1].([]string)
+	fields := strings.Join(vals, ", ")
+	sql := fmt.Sprintf("INSERT INTO %s (%v)", tableName, fields)
+	return sql, []interface{}{}
+}
+
+func _delete(val ...interface{}) (string, []interface{}) {
+	return fmt.Sprintf("DELETE FROM %s", val[0]), []interface{}{}
+}
+
+func _count(val ...interface{}) (string, []interface{}) {
+	return _select(val[0], []string{"COUNT(*)"})
 }

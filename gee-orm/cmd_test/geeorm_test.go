@@ -65,7 +65,7 @@ func TestInsertRecord(t *testing.T) {
 	engine, _ := geeorm.NewEngine("root:root@tcp(192.168.255.3:3306)/books", "mysql")
 	defer engine.Close()
 	s := engine.NewSession()
-	s.Insert(user2, user3)
+	s.Insert(user2, user1)
 }
 
 func TestFindRecord(t *testing.T) {
@@ -75,6 +75,42 @@ func TestFindRecord(t *testing.T) {
 	var user []User
 	if err := s.Find(&user); err != nil {
 		log.Fatal("Find error!")
+	}
+	t.Logf("%#v", user)
+}
+
+func TestDeleteRecord(t *testing.T) {
+	engine, _ := geeorm.NewEngine("root:root@tcp(192.168.255.3:3306)/books", "mysql")
+	defer engine.Close()
+	s := engine.NewSession()
+	s.Where("ID = 2")
+	if rowNum, err := s.Delete(&User{}); err != nil {
+		log.Fatal("Delete error!")
+	} else {
+		t.Log(rowNum)
+	}
+}
+
+func TestCountRecord(t *testing.T) {
+	engine, _ := geeorm.NewEngine("root:root@tcp(192.168.255.3:3306)/books", "mysql")
+	defer engine.Close()
+	s := engine.NewSession()
+	if rowNum, err := s.Count(&User{}); err != nil {
+		log.Fatal("Count error!")
+	} else {
+		t.Log(rowNum)
+	}
+}
+
+func TestGetFirstRecord(t *testing.T) {
+	engine, _ := geeorm.NewEngine("root:root@tcp(192.168.255.3:3306)/books", "mysql")
+	defer engine.Close()
+	s := engine.NewSession()
+	s.OrderBy("ID DESC")
+	//var user User
+	user := &User{}
+	if err := s.First(user); err != nil {
+		log.Fatal("Get First error!")
 	}
 	t.Logf("%#v", user)
 }

@@ -50,7 +50,8 @@ func (s *Session) Raw(sql string, val ...interface{}) *Session {
 func (s *Session) Exec() (sql.Result, error) {
 	defer s.Reset()
 	result, err := s.db.Exec(s.sql.String(), s.sqlVal...)
-	log.Info(s.sql.String(), s.sqlVal)
+	log.Info(s.sql.String())
+	log.Info(s.sqlVal)
 	if err != nil {
 		log.Error(err)
 	}
