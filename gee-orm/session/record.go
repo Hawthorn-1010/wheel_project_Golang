@@ -21,7 +21,7 @@ func (s *Session) GenInsertVals(model interface{}) []interface{} {
 
 func (s *Session) GenInsertColumns() []string {
 	var columns []string
-	for _, column := range s.table.Columns {
+	for _, column := range s.Table.Columns {
 		columns = append(columns, column.Name)
 	}
 	return columns
@@ -29,9 +29,7 @@ func (s *Session) GenInsertColumns() []string {
 
 // [[Tome 18][]] Insert(user1, user2) default: insert the same type
 func (s *Session) Insert(model ...interface{}) (int64, error) {
-	//test := model[0]
-	s.SetTable(model[0])
-	s.clause.Set(clause.INSERT, s.table.TableName, s.GenInsertColumns())
+	s.clause.Set(clause.INSERT, s.Table.TableName, s.GenInsertColumns())
 	// [[][]]
 	vals := []interface{}{}
 
@@ -52,7 +50,7 @@ func (s *Session) Find(models interface{}) error {
 	s.Hook(BeforeQuery, nil)
 	modelSlice := reflect.Indirect(reflect.ValueOf(models))
 	modelType := modelSlice.Type().Elem()
-	table := s.SetTable(reflect.New(modelType).Elem().Interface()).table
+	table := s.SetTable(reflect.New(modelType).Elem().Interface()).Table
 
 	s.clause.Set(clause.SELECT, table.TableName, s.GenInsertColumns())
 
@@ -80,29 +78,28 @@ func (s *Session) Find(models interface{}) error {
 	return rows.Close()
 }
 
-func (s *Session) Update(model ...interface{}) (int64, error) {
-	//test := model[0]
-	s.SetTable(model[0])
-	s.clause.Set(clause.INSERT, s.table.TableName, s.GenInsertColumns())
-	// [[][]]
-	vals := []interface{}{}
-
-	for i := 0; i < len(model); i++ {
-		vals = append(vals, s.GenInsertVals(model[i]))
+// Update records with where clause
+// support map[string]interface{}
+// also support kv list: "Name", "Tom", "Age", 18, ....
+func (s *Session) Update(kv ...interface{}) (int64, error) {
+	m, ok := kv[0].(map[string]interface{})
+	if !ok {
+		m = make(map[string]interface{})
+		for i := 0; i < len(kv); i += 2 {
+			m[kv[i].(string)] = kv[i+1]
+		}
 	}
-	s.clause.Set(clause.VALUES, vals...)
-	sql, sqlVal := s.clause.Build(clause.INSERT, clause.VALUES)
-	res, err := s.Raw(sql, sqlVal...).Exec()
+	s.clause.Set(clause.UPDATE, s.Table.TableName, m)
+	sql, vars := s.clause.Build(clause.UPDATE, clause.WHERE)
+	result, err := s.Raw(sql, vars...).Exec()
 	if err != nil {
 		return 0, err
 	}
-	return res.RowsAffected()
+	return result.RowsAffected()
 }
 
 func (s *Session) Delete(model ...interface{}) (int64, error) {
-	//test := model[0]
-	s.SetTable(model[0])
-	s.clause.Set(clause.DELETE, s.table.TableName)
+	s.clause.Set(clause.DELETE, s.Table.TableName)
 	sql, sqlVal := s.clause.Build(clause.DELETE, clause.WHERE)
 	res, err := s.Raw(sql, sqlVal...).Exec()
 	if err != nil {
@@ -112,8 +109,7 @@ func (s *Session) Delete(model ...interface{}) (int64, error) {
 }
 
 func (s *Session) Count(model ...interface{}) (int64, error) {
-	s.SetTable(model[0])
-	s.clause.Set(clause.COUNT, s.table.TableName)
+	s.clause.Set(clause.COUNT, s.Table.TableName)
 
 	sql, sqlVal := s.clause.Build(clause.COUNT)
 	row := s.Raw(sql, sqlVal...).QueryRow()
@@ -129,7 +125,7 @@ func (s *Session) First(value interface{}) error {
 	dest := reflect.Indirect(reflect.ValueOf(value))
 	destSlice := reflect.New(reflect.SliceOf(dest.Type())).Elem()
 	//modelType := modelSlice.Type().Elem()
-	//s.clause.Set(clause.SELECT, s.table.TableName, s.GenInsertColumns())
+	//s.clause.Set(clause.SELECT, s.Table.TableName, s.GenInsertColumns())
 	//if err := s.Limit(1).Find(&destSlice); err != nil {
 	if err := s.Limit(1).Find(destSlice.Addr().Interface()); err != nil {
 		return err

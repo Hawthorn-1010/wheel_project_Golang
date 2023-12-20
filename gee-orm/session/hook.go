@@ -17,9 +17,9 @@ const (
 )
 
 func (s *Session) Hook(method string, model interface{}) {
-	//f := reflect.Indirect(reflect.ValueOf(s.table.Model)).MethodByName(method)
+	//f := reflect.Indirect(reflect.ValueOf(s.Table.Model)).MethodByName(method)
 	// todo m is a ptr
-	m := s.table.Model
+	m := s.Table.Model
 	f := reflect.ValueOf(m).MethodByName(method)
 	if model != nil {
 		f = reflect.ValueOf(model).MethodByName(method)

@@ -58,7 +58,6 @@ func _values(vals ...interface{}) (string, []interface{}) {
 	return sql.String(), vars
 }
 
-// TODO 是否需要修改
 func _select(val ...interface{}) (string, []interface{}) {
 	tableName := val[0]
 	fields := strings.Join(val[1].([]string), ", ")
@@ -80,13 +79,16 @@ func _orderBy(val ...interface{}) (string, []interface{}) {
 	return sql, []interface{}{}
 }
 
-// TODO
 func _update(val ...interface{}) (string, []interface{}) {
 	tableName := val[0]
-	vals := val[1].([]string)
-	fields := strings.Join(vals, ", ")
-	sql := fmt.Sprintf("INSERT INTO %s (%v)", tableName, fields)
-	return sql, []interface{}{}
+	m := val[1].(map[string]interface{})
+	var keys []string
+	var vars []interface{}
+	for k, v := range m {
+		keys = append(keys, k+" = ?")
+		vars = append(vars, v)
+	}
+	return fmt.Sprintf("UPDATE %s SET %s", tableName, strings.Join(keys, ", ")), vars
 }
 
 func _delete(val ...interface{}) (string, []interface{}) {

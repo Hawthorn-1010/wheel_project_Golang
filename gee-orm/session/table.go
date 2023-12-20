@@ -8,21 +8,21 @@ import (
 	"strings"
 )
 
-// 1. initialize table in session
+// 1. initialize Table in session
 // 2. create drop
 
 func (s *Session) SetTable(model interface{}) *Session {
-	if s.table == nil || reflect.Indirect(reflect.ValueOf(s.table.Model)).Type() != reflect.Indirect(reflect.ValueOf(model)).Type() {
-		s.table = schema.Parse(model, s.dialect)
+	if s.Table == nil || reflect.Indirect(reflect.ValueOf(s.Table.Model)).Type() != reflect.Indirect(reflect.ValueOf(model)).Type() {
+		s.Table = schema.Parse(model, s.dialect)
 	}
 	return s
 }
 
 func (s *Session) GetTable() *schema.Table {
-	if s.table == nil {
-		log.Error("table not set!")
+	if s.Table == nil {
+		log.Error("Table not set!")
 	}
-	return s.table
+	return s.Table
 }
 
 func (s *Session) CreateTable() error {
@@ -43,7 +43,7 @@ func (s *Session) DropTable() error {
 }
 
 func (s *Session) HasTable() bool {
-	sql, args := s.dialect.TableExist(s.dbName, s.table.TableName)
+	sql, args := s.dialect.TableExist(s.dbName, s.Table.TableName)
 	result := s.Raw(sql, args...).QueryRow()
 
 	var tableName string
@@ -51,7 +51,7 @@ func (s *Session) HasTable() bool {
 	if err != nil {
 		log.Error(err)
 	}
-	if tableName == s.table.TableName {
+	if tableName == s.Table.TableName {
 		return true
 	}
 	return false

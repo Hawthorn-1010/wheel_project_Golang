@@ -5,8 +5,9 @@ import (
 )
 
 type User struct {
-	Id   int
+	Id   int `geeorm:"PRIMARY KEY"`
 	Name string
+	Age  int
 }
 
 func TestCreateTable(t *testing.T) {
@@ -18,6 +19,6 @@ func TestCreateTable(t *testing.T) {
 	session.DropTable()
 	session.CreateTable()
 	if session.HasTable() {
-		t.Log("create table success!")
+		t.Log("create Table success!")
 	}
 }

@@ -11,20 +11,33 @@ import (
 
 type Session struct {
 	dialect dialect.Dialect
-	db      *sql.DB
 	dbName  string
+	db      *sql.DB
+	tx      *sql.Tx
 	clause  clause.Clause
-	table   *schema.Table
+	Table   *schema.Table
 	sql     strings.Builder
 	sqlVal  []interface{}
 }
+
+type CommonDB interface {
+	Query(query string, args ...interface{}) (*sql.Rows, error)
+	QueryRow(query string, args ...interface{}) *sql.Row
+	Exec(query string, args ...interface{}) (sql.Result, error)
+}
+
+var _ CommonDB = (*sql.DB)(nil)
+var _ CommonDB = (*sql.Tx)(nil)
 
 func New(db *sql.DB, dialect dialect.Dialect, dbName string) *Session {
 	return &Session{db: db, dialect: dialect, dbName: dbName}
 }
 
 // Encapsulation
-func (s *Session) DB() *sql.DB {
+func (s *Session) DB() CommonDB {
+	if s.tx != nil {
+		return s.tx
+	}
 	return s.db
 }
 

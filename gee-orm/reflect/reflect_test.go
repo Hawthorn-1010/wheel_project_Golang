@@ -80,3 +80,46 @@ func TestReflect(t *testing.T) {
 	//
 	//	}
 }
+
+func TestPanic(t *testing.T) {
+	//注册捕获panic的函数,必须先注册，若在panic之后则无效
+	defer doPanic()
+	n := 0
+	res := 1 / n
+	fmt.Println(res) //panic 之后的代码不会执行
+}
+
+// 当捕获到panic时触发此函数
+func doPanic() {
+	err := recover()
+	if err != nil {
+		fmt.Println("捕获到panic")
+		//panic(err)
+	}
+}
+
+type MyStruct struct {
+	Field1 int    `json:"field1" custom:"tag1"`
+	Field2 string `json:"field2" custom:"tag2"`
+}
+
+func TestTagStruct(t *testing.T) {
+	// Get the type of MyStruct
+	myStructType := reflect.TypeOf(MyStruct{})
+
+	// Get the first field of MyStruct
+	field := myStructType.Field(0)
+
+	// Get the struct tag for the "json" key
+	tag := field.Tag
+	jsonTag := tag.Get("json")
+	fmt.Println("JSON Tag:", jsonTag)
+
+	// Use Lookup to get the value for a custom key
+	customTag, exists := tag.Lookup("custom")
+	if exists {
+		fmt.Println("Custom Tag:", customTag)
+	} else {
+		fmt.Println("Custom Tag not found")
+	}
+}
